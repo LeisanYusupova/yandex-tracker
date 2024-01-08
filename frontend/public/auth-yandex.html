@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charSet="utf-8" />
+  <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, shrink-to-fit=no, viewport-fit=cover'>
+  <meta http-equiv='X-UA-Compatible' content='ie=edge'>
+  <style>
+      html,
+      body {
+          background: #eee;
+      }
+      .wrapper {
+          padding: 15px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 15px;
+      }
+      .button {
+          margin: 0 auto;
+          min-height: 57px;
+          display: block;
+          width: 250px;
+          border-radius: 10px;
+          border: 1px solid;
+          padding: 12px;
+          background-color: #1b1b25;
+          color: white;
+      }
+  </style>
+  <script src="https://yastatic.net/s3/passport-sdk/autofill/v1/sdk-suggest-with-polyfills-latest.js"></script>
+</head>
+
+<body>
+<script>
+  window.onload = function() {
+    window.YaAuthSuggest.init({
+        client_id: '905c1c91055641f0ac1244ac5d64e9de',
+        response_type: 'token',
+        redirect_uri: 'https://tracker.seven-group.pro/token.html'
+      },
+      '--https://tracker.seven-group.pro/--'
+    )
+      .then(({ handler }) => handler())
+      .then(async (data) => {
+        console.log(data);
+        window.sessionStorage.setItem('tokenYandex', data.access_token);
+      })
+      .catch((error) => console.log("Что-то пошло не так: ", error));
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    const button = document.getElementById('button');
+    const authButton = document.getElementById('auth-button');
+
+    button.addEventListener('click', function() {
+      window.location.href = 'https://tracker.seven-group.pro/calculation';
+    });
+    authButton.addEventListener('click', function() {
+      console.log('click');
+      window.location.href = 'https://tracker.seven-group.pro/';
+    });
+  });
+</script>
+
+<div class ='wrapper'>
+  <button class ='button' id = 'button'>Перейти к отчету</button>
+  <button class = 'button' id = 'auth-button'>Вернуться на страницу авторизации</button>
+</div>
+</body>
+
+</html>

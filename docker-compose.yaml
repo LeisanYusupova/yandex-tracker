@@ -1,0 +1,44 @@
+version: '3.3'
+
+networks:
+  traefik-net:
+    external: true
+
+services:
+  app:
+    image: registry.gitlab.com/sevengroupdevelopers/yandex-tracker-timer:${CI_PIPELINE_IID:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+
+      # HTTPS Configuration
+      - "traefik.http.routers.tracker.rule=Host(`tracker.seven-group.pro`)"
+      - "traefik.http.routers.tracker.entrypoints=websecure"
+      - "traefik.http.routers.tracker.tls=true"
+      - "traefik.http.routers.tracker.tls.certresolver=resolver"
+      - "traefik.http.routers.tracker.middlewares=cors,corspreflight"
+
+      # HTTP Configuration
+      - "traefik.http.routers.tracker_http.rule=Host(`tracker.seven-group.pro`)"
+      - "traefik.http.routers.tracker_http.entrypoints=web"
+
+      # Common Backend
+      - "traefik.http.services.tracker.loadbalancer.server.port=80"
+
+      # Redirect HTTP to HTTPS
+      - "traefik.http.routers.tracker_http.middlewares=redirect-to-https@docker"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+      # CORS Middleware Configuration
+      - "traefik.http.middlewares.cors.headers.accessControlAllowMethods=GET,POST,PUT,DELETE,OPTIONS,PATCH"
+      - "traefik.http.middlewares.cors.headers.accessControlAllowHeaders=Authorization,Origin,X-Requested-With,Content-Type,Accept"
+      - "traefik.http.middlewares.cors.headers.accessControlExposeHeaders=Content-Disposition"
+      - "traefik.http.middlewares.cors.headers.AccessControlAllowOriginList=*"
+      - "traefik.http.middlewares.corspreflight.plugin.corspreflight.code=204"
+      - "traefik.http.middlewares.corspreflight.plugin.corspreflight.method=OPTIONS"
